@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
 	
@@ -24,6 +26,19 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			database="${db.database}" 
 		/>
 	</db:config>
+	
+			<configuration doc:name="Configuration" doc:id="c29ddadb-3b3a-4665-9d89-de46f69558bc" defaultErrorHandler-ref="Error_Handler"/>
+	<error-handler name="Error_Handler">
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="ec0f13e9-6f13-4f72-8b62-3fdb57f85ff3" type="ANY">
+			<ee:transform doc:name="Transform Message" doc:id="cf16ee6d-267a-4136-9c78-5408577567b5">
+					<ee:message>
+							<ee:set-payload resource="error-general.dwl" />
+					</ee:message>
+				</ee:transform>
+			<set-payload value="#[payload]" doc:name="Set Payload" doc:id="def1a3ab-24ef-4ba9-a935-de8a0bb5389f" />
+		</on-error-continue>
+		</error-handler>
+	
 </mule>
 
 	
