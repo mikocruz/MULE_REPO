@@ -16,10 +16,11 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<http:listener doc:name="Get User"
 			doc:id="dea62d94-9d23-432c-8e9d-88703ca50343" path="/getUser/{userName}"
 			config-ref="HTTP_Listener_config" />
+		<logger level="INFO" doc:name="Logger" doc:id="d73fa475-ae42-4767-8f83-b0a642270204" message="key is #[attributes.headers.'authorization']" />
 		<choice doc:name="Authentication" doc:id="237fb120-5951-482a-90d4-7c15909f0351">
 			<when expression="#[attributes.headers.'authorization' == '${http.authKey}']" doc:id="7a5e2b02-b06b-4aa6-8a1c-2a1bb6c87ff2">
 				<set-variable value="#[attributes.uriParams.userName]" doc:name="userName" doc:id="017f6e7c-93c7-4bc4-9759-e3133aefc3a3" variableName="userName" />
-				<logger level="INFO" doc:name="Logger" doc:id="d73fa475-ae42-4767-8f83-b0a642270204" message="${http.authKey}" />
+				<logger level="INFO" doc:name="Logger" doc:id="d7415523-1a73-46ae-bb5f-50e77fadb709" message="Finding #[vars.userName] in the database ..."/>
 				<db:select doc:name="getUser" doc:id="836c3431-3f67-4f75-9293-51bc11db5972" config-ref="MULEDEMO">
 					<db:sql>SELECT a.UserName, a.FullName, a.BirthDate, a.Gender,
 						b.Active, b.Date_Registered FROM USER_DETAILS a, ACCOUNT b WHERE
@@ -57,13 +58,14 @@ payload]]></ee:set-variable>
 			
 			</when>
 			<otherwise>
+				<logger level="ERROR" doc:name="Logger" doc:id="1c73d116-b203-4f4b-8141-983aa65d0fdd" message="Incorrect key. " />
 				<ee:transform doc:name="Transform Message" doc:id="81579acd-81bc-4f1c-8d0d-b4f818169581" >
 					<ee:message >
-						<ee:set-attributes resource="error-auth.dwl" />
+						<ee:set-payload resource="error-auth.dwl" />
 					</ee:message>
 				</ee:transform>
 				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="6e532571-e625-48c0-9146-a9152734417f" />
-				<logger level="ERROR" doc:name="Logger" doc:id="3969d9d8-8873-44ab-b022-469a2e505e7d" message="#[payload]"/>
+				<logger level="INFO" doc:name="Logger" doc:id="3969d9d8-8873-44ab-b022-469a2e505e7d" message="#[payload]"/>
 			</otherwise>
 		</choice>
 		
@@ -73,10 +75,12 @@ payload]]></ee:set-variable>
 	
 	<http:listener doc:name="Listener" doc:id="d4f6ea21-b815-447a-8867-9dd71f7b4d4e" config-ref="HTTP_Listener_config" path="/getUsers"/>
 		
-	<choice doc:name="Authentication" doc:id="bb175a7f-cb11-42fa-b495-13a4c748691b" >
+	<logger level="INFO" doc:name="Logger" doc:id="24b3729b-cce3-46b6-8c03-e2b5a74a2321" message="key is #[attributes.headers.'authorization']" />
+		<choice doc:name="Authentication" doc:id="bb175a7f-cb11-42fa-b495-13a4c748691b" >
 		<when expression="#[attributes.headers.'authorization' == '${http.authKey}']">
 			
-			<db:select doc:name="Select" doc:id="f72450d1-a00e-496c-8526-8c8421ce273d" config-ref="MULEDEMO">
+			<logger level="INFO" doc:name="Logger" doc:id="0bd21cc6-7a21-41a3-9916-d66ae52d59e4" message="Querying for users ..."/>
+				<db:select doc:name="Select" doc:id="f72450d1-a00e-496c-8526-8c8421ce273d" config-ref="MULEDEMO">
 				<db:sql>SELECT a.UserName, a.FullName, a.BirthDate, a.Gender,
 					b.Active, b.Date_Registered FROM USER_DETAILS a, ACCOUNT b WHERE a.UserID = b.UserID AND b.Active = 1</db:sql>
 			</db:select>
@@ -103,9 +107,10 @@ payload]]></ee:set-variable>
 			</choice>		
 		</when>
 			<otherwise >
+				<logger level="ERROR" doc:name="Logger" doc:id="b4d9dd7d-891a-48f8-bc4f-55228ec9202b" message="Incorrect key. "/>
 				<ee:transform doc:name="Transform Message" doc:id="3c32c73e-6b2b-464f-bbc5-43876c742030" >
 					<ee:message >
-						<ee:set-attributes resource="error-auth.dwl" />
+						<ee:set-payload resource="error-auth.dwl" />
 					</ee:message>
 				</ee:transform>
 				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="862a0f36-4afd-47da-8535-9445a998705c" />

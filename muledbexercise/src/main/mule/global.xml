@@ -30,12 +30,14 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			<configuration doc:name="Configuration" doc:id="c29ddadb-3b3a-4665-9d89-de46f69558bc" defaultErrorHandler-ref="Error_Handler"/>
 	<error-handler name="Error_Handler">
 		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="ec0f13e9-6f13-4f72-8b62-3fdb57f85ff3" type="ANY">
+			<logger level="ERROR" doc:name="Logger" doc:id="046a904c-7ea5-4774-ab06-45da02bc4985" message="System error occured." />
 			<ee:transform doc:name="Transform Message" doc:id="cf16ee6d-267a-4136-9c78-5408577567b5">
 					<ee:message>
 							<ee:set-payload resource="error-general.dwl" />
 					</ee:message>
 				</ee:transform>
 			<set-payload value="#[payload]" doc:name="Set Payload" doc:id="def1a3ab-24ef-4ba9-a935-de8a0bb5389f" />
+			<logger level="ERROR" doc:name="Logger" doc:id="87879bd5-ca81-41b0-9f3a-8c4a859fb7c6" message="#[payload]"/>
 		</on-error-continue>
 		</error-handler>
 	
