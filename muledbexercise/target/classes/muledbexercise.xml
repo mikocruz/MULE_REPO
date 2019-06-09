@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+
+	<flow name="getUser" doc:id="6c3ef82f-6099-451d-b4fb-46a26805cc07">
+		<http:listener doc:name="Get User"
+			doc:id="dea62d94-9d23-432c-8e9d-88703ca50343" path="/getUser/{userName}"
+			config-ref="HTTP_Listener_config" />
+		<choice doc:name="Authentication" doc:id="237fb120-5951-482a-90d4-7c15909f0351">
+			<when expression="#[attributes.headers.'authorization' == '${http.authKey}']" doc:id="7a5e2b02-b06b-4aa6-8a1c-2a1bb6c87ff2">
+				<set-variable value="#[attributes.uriParams.userName]" doc:name="userName" doc:id="017f6e7c-93c7-4bc4-9759-e3133aefc3a3" variableName="userName" />
+				<logger level="INFO" doc:name="Logger" doc:id="d73fa475-ae42-4767-8f83-b0a642270204" message="${http.authKey}" />
+				<db:select doc:name="getUser" doc:id="836c3431-3f67-4f75-9293-51bc11db5972" config-ref="MULEDEMO">
+					<db:sql>SELECT a.UserName, a.FullName, a.BirthDate, a.Gender,
+						b.Active, b.Date_Registered FROM USER_DETAILS a, ACCOUNT b WHERE
+						a.UserName = :userName AND a.UserID = b.UserID AND b.Active = 1
+					</db:sql>
+					<db:input-parameters ><![CDATA[#['userName': vars.userName]]]></db:input-parameters>
+				</db:select>
+				<logger level="INFO" doc:name="Logger" doc:id="79738f5d-6ee3-429c-81a3-1bea89754824" message="#[payload]"/>
+				<ee:transform doc:name="Transform Message" doc:id="36869530-9f53-4b9f-aaa9-cda3a16c685e">
+			<ee:message>
+				<ee:set-payload resource="transform-userlist-payload.dwl" />
+			</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="output" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+					</ee:variables>
+		</ee:transform>
+				<choice doc:name="Choice" doc:id="8a9a6706-d003-446e-bdf6-5c58f4a2648b">
+			<when expression="#[sizeOf(payload) &gt; 0]" doc:id="5e98b0a5-c9ff-4435-a59b-2dfa4af2ef18">
+				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="290c26c1-3350-4063-b580-2de059ea56c2" />
+						<logger level="INFO" doc:name="Logger" doc:id="94b17474-5455-4995-b32e-3d3a458319da" message="#[payload]" />
+			</when>
+				<otherwise>
+						<ee:transform doc:name="Transform Message" doc:id="c123838d-b4f2-4255-aaf1-41246e5693d6">
+					<ee:message>
+								<ee:set-payload resource="error-usernotfound.dwl" />
+					</ee:message>
+				</ee:transform>
+						<set-payload value="#[payload]" doc:name="Set Payload" doc:id="a0128097-b37b-4025-a76d-8adb645ea69e" />
+						<logger level="ERROR" doc:name="Logger" doc:id="0ff631a8-337e-4a6c-9bff-f30759595a94" message="#[payload]"/>
+			</otherwise>
+		</choice>
+			
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="81579acd-81bc-4f1c-8d0d-b4f818169581" >
+					<ee:message >
+						<ee:set-attributes resource="error-auth.dwl" />
+					</ee:message>
+				</ee:transform>
+				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="6e532571-e625-48c0-9146-a9152734417f" />
+				<logger level="ERROR" doc:name="Logger" doc:id="3969d9d8-8873-44ab-b022-469a2e505e7d" message="#[payload]"/>
+			</otherwise>
+		</choice>
+		
+	</flow>
+	
+	<flow name="getUsers" doc:id="3080d267-0847-4f56-a5a1-5523139e9966" >
+	
+	<http:listener doc:name="Listener" doc:id="d4f6ea21-b815-447a-8867-9dd71f7b4d4e" config-ref="HTTP_Listener_config" path="/getUsers"/>
+		
+	<choice doc:name="Authentication" doc:id="bb175a7f-cb11-42fa-b495-13a4c748691b" >
+		<when expression="#[attributes.headers.'authorization' == '${http.authKey}']">
+			
+			<db:select doc:name="Select" doc:id="f72450d1-a00e-496c-8526-8c8421ce273d" config-ref="MULEDEMO">
+				<db:sql>SELECT a.UserName, a.FullName, a.BirthDate, a.Gender,
+					b.Active, b.Date_Registered FROM USER_DETAILS a, ACCOUNT b WHERE a.UserID = b.UserID AND b.Active = 1</db:sql>
+			</db:select>
+				<ee:transform doc:name="Transform Message" doc:id="1361a474-0b78-4676-84f5-e61dc6558395">
+				<ee:message>
+						<ee:set-payload resource="transform-userlist-payload.dwl" />
+				</ee:message>
+			</ee:transform>
+			<choice doc:name="Choice" doc:id="8650b29f-4431-4383-b2a1-15323375150b">
+				<when expression="#[sizeOf(payload) &gt; 0]" doc:id="2bed8781-fb26-4f85-b2c4-4dad6ae3c6e8">
+					<set-payload value="#[payload]" doc:name="Set Payload" doc:id="dbd42419-1b9a-4f13-b747-a73c3b9427f0" />
+						<logger level="INFO" doc:name="Logger" doc:id="0a2570f4-001c-4810-a53d-e041ecb7db4e" message="#[payload]"/>
+				</when>
+					<otherwise>
+						<ee:transform doc:name="Transform Message" doc:id="fc01854d-8ab1-4b41-81a9-b0295e800979" >
+							<ee:message >
+								<ee:set-payload resource="error-general.dwl" />
+							</ee:message>
+						</ee:transform>
+						<set-payload value="#[payload]" doc:name="Set Payload" doc:id="a59f5c29-bcc2-4ccd-9881-63a3824959f2" />
+						<logger level="ERROR" doc:name="Logger" doc:id="0fc04abe-5603-488f-aefb-a0bbee594a97" message="#[payload]"/>
+						
+				</otherwise>
+			</choice>		
+		</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="3c32c73e-6b2b-464f-bbc5-43876c742030" >
+					<ee:message >
+						<ee:set-attributes resource="error-auth.dwl" />
+					</ee:message>
+				</ee:transform>
+				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="862a0f36-4afd-47da-8535-9445a998705c" />
+				<logger level="ERROR" doc:name="Logger" doc:id="6a2dadfe-9174-49af-9d3f-509c5a38a996" message="#[payload]" />
+			</otherwise>
+	</choice>
+</flow>
+</mule>

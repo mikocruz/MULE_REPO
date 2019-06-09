@@ -1,0 +1,9 @@
+{
+	User: {
+		UserName: "usrname",
+		FullName: "John Doe",
+		Age: "40",
+		Gender: "Male",
+		Date_Registered: "06-08-2019"
+	}
+}

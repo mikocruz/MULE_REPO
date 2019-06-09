@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="new-test-suite.xml" />
+	<munit:test name="new-test-suite-getUserTest" description="Test" doc:id="d78bbe8c-5eb1-466c-baff-09bf93581f97" >
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to getUser" doc:id="e982b982-d145-4735-8767-c54b46ff16b0" name="getUser"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="f87b444c-5cba-445a-ba8f-16eb1792c197" expression="#[payload]" is="#[MunitTools::notNullValue()]" message="PASS"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="new-test-suite-getUsersTest" description="Test" doc:id="2da968b3-2b78-4a7f-8537-3844440b8bca" >
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to getUsers" doc:id="b80a79dc-b1ae-4ea3-b0c1-b969064c1241" name="getUsers"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="ee69cea7-67e1-4441-9ed3-69bb1a0c18d7" expression="#[payload]" is="#[MunitTools::notNullValue()]" message="PASS"/>
+		</munit:validation>
+	</munit:test>
+
+</mule>

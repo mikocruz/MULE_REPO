@@ -1,0 +1,23 @@
+http:
+  host: "localhost"
+  port: "8090"
+  authKey: "j32io33ise4k2qq1"
+  
+db:
+  host: "localhost"
+  port: "8889"
+  user: "root"
+  pass: "root"
+  database: "MuleDemo"
+  
+errors:
+  auth:
+    code: "500"
+    message: "Authentication failed"
+  userNotFound:
+    code: "404"
+    message: "User not found"
+  general:
+    code: "500"
+    message: "System error"
+    
